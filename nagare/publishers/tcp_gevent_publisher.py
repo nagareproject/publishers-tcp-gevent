@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2019 Net-ng.
+# Copyright (c) 2008-2020 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -44,7 +44,11 @@ class Publisher(publisher.Publisher, server.StreamServer):
         if patch_all:
             monkey.patch_all()  # Monkey patch the Python standard library
 
-        super(Publisher, self).__init__(name, dist, **config)
+        super(Publisher, self).__init__(
+            name, dist,
+            patch_all=patch_all, msg_end=msg_end, msg_max_len=msg_max_len,
+            **config
+        )
 
         self.msg_end = msg_end.encode('ascii')
         self.msg_max_len = msg_max_len
