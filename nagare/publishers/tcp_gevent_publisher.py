@@ -12,6 +12,7 @@
 """Gevent REST API server"""
 
 import os
+from functools import partial
 
 from gevent import monkey, server
 from gevent import socket as gsocket
@@ -36,7 +37,7 @@ class Publisher(publisher.Publisher, server.StreamServer):
         port='integer(default=20000)',  # TCP port to listen on
         backlog='integer(default=256)',  # Max nb of waiting requests,
         patch_all='boolean(default=True)',
-        msg_end='string(default="\n")',
+        msg_end='string(default=None)',
         msg_max_len='integer(default=1024)'
     )
 
@@ -50,9 +51,8 @@ class Publisher(publisher.Publisher, server.StreamServer):
             **config
         )
 
-        self.msg_end = msg_end.encode('ascii')
+        self.msg_end = (msg_end or '\n').encode('ascii')
         self.msg_max_len = msg_max_len
-        self.app = None
 
     @property
     def endpoint(self):
@@ -90,18 +90,17 @@ class Publisher(publisher.Publisher, server.StreamServer):
                     len_received = 0
                     chunks = []
 
-    def handle(self, sock, client):
-        self.start_handle_request(self.app, sock=sock, client=client, msg_type='open', msg=None)
+    def handle(self, app, services, sock, client):
+        self.start_handle_request(app, services, sock=sock, client=client, msg_type='open', msg=None)
 
         for msg in self.recv_msg(sock, self.msg_end, self.msg_max_len):
-            response = self.start_handle_request(self.app, sock=sock, client=client, msg_type='receive', msg=msg)
+            response = self.start_handle_request(app, services, sock=sock, client=client, msg_type='receive', msg=msg)
             if response is not None:
                 sock.send(response)
 
-        self.start_handle_request(self.app, sock=sock, client=client, msg_type='close', msg=None)
+        self.start_handle_request(app, services, sock=sock, client=client, msg_type='close', msg=None)
 
     def _serve(self, app, host, port, socket, mode, backlog, services_service, **config):
-        self.app = app
 
         if socket:
             # Create a unix socket
@@ -116,7 +115,7 @@ class Publisher(publisher.Publisher, server.StreamServer):
             # Create a TCP socket
             listener = (host, port)
 
-        server.StreamServer.__init__(self, listener, backlog=backlog)
+        server.StreamServer.__init__(self, listener, partial(self.handle, app, services_service), backlog)
 
         services_service(super(Publisher, self)._serve, app)
 
