@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -9,10 +9,10 @@
 # this distribution.
 # --
 
-"""Gevent REST API server"""
+"""Gevent REST API server."""
 
-import os
 from functools import partial
+import os
 
 from gevent import monkey, server
 from gevent import socket as gsocket
@@ -27,7 +27,7 @@ else:
 
 
 class Publisher(publisher.Publisher, server.StreamServer):
-    """TCP server"""
+    """TCP server."""
 
     CONFIG_SPEC = dict(
         publisher.Publisher.CONFIG_SPEC,
@@ -38,7 +38,7 @@ class Publisher(publisher.Publisher, server.StreamServer):
         backlog='integer(default=256)',  # Max nb of waiting requests,
         patch_all='boolean(default=True)',
         msg_end='string(default=None)',
-        msg_max_len='integer(default=1024)'
+        msg_max_len='integer(default=1024)',
     )
 
     def __init__(self, name, dist, patch_all, msg_end, msg_max_len, **config):
@@ -46,9 +46,7 @@ class Publisher(publisher.Publisher, server.StreamServer):
             monkey.patch_all()  # Monkey patch the Python standard library
 
         super(Publisher, self).__init__(
-            name, dist,
-            patch_all=patch_all, msg_end=msg_end, msg_max_len=msg_max_len,
-            **config
+            name, dist, patch_all=patch_all, msg_end=msg_end, msg_max_len=msg_max_len, **config
         )
 
         self.msg_end = (msg_end or '\n').encode('ascii')

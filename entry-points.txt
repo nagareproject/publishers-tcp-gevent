@@ -1,0 +1,2 @@
+[nagare.publishers]
+tcp-gevent = nagare.publishers.tcp_gevent_publisher:Publisher
