@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2023 Net-ng.
+# Copyright (c) 2008-2024 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -11,11 +11,12 @@
 
 """Gevent REST API server."""
 
-from functools import partial
 import os
+from functools import partial
 
 from gevent import monkey, server
 from gevent import socket as gsocket
+
 from nagare.server import publisher
 
 try:
@@ -99,7 +100,6 @@ class Publisher(publisher.Publisher, server.StreamServer):
         self.start_handle_request(app, services, sock=sock, client=client, msg_type='close', msg=None)
 
     def _serve(self, app, host, port, socket, mode, backlog, services_service, **config):
-
         if socket:
             # Create a unix socket
             listener = gsocket.socket(gsocket.AF_UNIX, gsocket.SOCK_STREAM)
