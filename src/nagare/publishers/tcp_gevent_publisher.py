@@ -1,7 +1,5 @@
-# Encoding: utf-8
-
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -30,25 +28,22 @@ else:
 class Publisher(publisher.Publisher, server.StreamServer):
     """TCP server."""
 
-    CONFIG_SPEC = dict(
-        publisher.Publisher.CONFIG_SPEC,
-        socket='string(default=None)',  # Unix socket to listen on
-        mode='integer(default=384)',  # RW mode of the unix socket
-        host='string(default="127.0.0.1")',  # TCP host to listen on
-        port='integer(default=20000)',  # TCP port to listen on
-        backlog='integer(default=256)',  # Max nb of waiting requests,
-        patch_all='boolean(default=True)',
-        msg_end='string(default=None)',
-        msg_max_len='integer(default=1024)',
-    )
+    CONFIG_SPEC = publisher.Publisher.CONFIG_SPEC | {
+        'socket': 'string(default=None)',  # Unix socket to listen on
+        'mode': 'integer(default=384)',  # RW mode of the unix socket
+        'host': 'string(default="127.0.0.1")',  # TCP host to listen on
+        'port': 'integer(default=20000)',  # TCP port to listen on
+        'backlog': 'integer(default=256)',  # Max nb of waiting requests,
+        'patch_all': 'boolean(default=True)',
+        'msg_end': 'string(default=None)',
+        'msg_max_len': 'integer(default=1024)',
+    }
 
     def __init__(self, name, dist, patch_all, msg_end, msg_max_len, **config):
         if patch_all:
             monkey.patch_all()  # Monkey patch the Python standard library
 
-        super(Publisher, self).__init__(
-            name, dist, patch_all=patch_all, msg_end=msg_end, msg_max_len=msg_max_len, **config
-        )
+        super().__init__(name, dist, patch_all=patch_all, msg_end=msg_end, msg_max_len=msg_max_len, **config)
 
         self.msg_end = (msg_end or '\n').encode('ascii')
         self.msg_max_len = msg_max_len
@@ -57,14 +52,14 @@ class Publisher(publisher.Publisher, server.StreamServer):
     def endpoint(self):
         socket = self.plugin_config['socket']
         if socket:
-            endpoint = 'unix:{} -> '.format(socket)
+            endpoint = f'unix:{socket} -> '
         else:
             endpoint = 'tcp://{}:{}'.format(self.plugin_config['host'], self.plugin_config['port'])
 
         return not socket, endpoint
 
     def generate_banner(self):
-        return super(Publisher, self).generate_banner() + ' on ' + self.endpoint[1]
+        return super().generate_banner() + ' on ' + self.endpoint[1]
 
     @staticmethod
     def recv_msg(sock, delimiter, max_len):
@@ -115,7 +110,7 @@ class Publisher(publisher.Publisher, server.StreamServer):
 
         server.StreamServer.__init__(self, listener, partial(self.handle, app, services_service), backlog)
 
-        services_service(super(Publisher, self)._serve, app)
+        services_service(super()._serve, app)
 
         try:
             self.serve_forever()
