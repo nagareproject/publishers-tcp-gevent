@@ -22,11 +22,8 @@ authors = [
     {email = 'contact@net-ng.com'}
 ]
 license = {file = 'LICENSE.txt'}
-requires-python = '>=3.7'
-dependencies = [
-    'gevent',
-    'nagare-server'
-]
+requires-python = '>=3.10'
+dependencies = ['gevent', 'nagare-server']
 
 [project.readme]
 file = 'README.rst'

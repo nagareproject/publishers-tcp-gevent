@@ -17,13 +17,6 @@ from gevent import socket as gsocket
 
 from nagare.server import publisher
 
-try:
-    import stackless  # noqa: F401
-except ImportError:
-    pass
-else:
-    raise ImportError('The gevent publisher only runs on CPython, not Stackless Python')
-
 
 class Publisher(publisher.Publisher, server.StreamServer):
     """TCP server."""
